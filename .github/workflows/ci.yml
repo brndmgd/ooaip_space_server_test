@@ -30,6 +30,9 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
+      
+      - name: Style
+        run: dotnet format --verify-no-changes
 
       - name: Restore dependencies
         working-directory: ${{ env.DIR }}
