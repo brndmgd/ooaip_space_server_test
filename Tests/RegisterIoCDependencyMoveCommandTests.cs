@@ -14,44 +14,29 @@ namespace Tests
         [Fact]
         public void Execute_RegistersMoveCommandFactory_DependencyCanBeResolved()
         {
-            var iocMock = new Mock<IIocService>();
+            var ioc = new IocService();
             
-            var adapter = new Dictionary<string, object>
-            {
-                ["Position"] = (Func<Vector>)(() => new Vector(1, 2)),
-                ["Velocity"] = (Func<Vector>)(() => new Vector(3, 4)),
-                ["SetPosition"] = (Action<Vector>)(_ => { })
-            };
+            var adapterMock = new Mock<IDictionary<string, object>>();
+            adapterMock.Setup(d => d["Position"]).Returns((Func<Vector>)(() => new Vector(10, 20)));
+            adapterMock.Setup(d => d["Velocity"]).Returns((Func<Vector>)(() => new Vector(1, 2)));
+            adapterMock.Setup(d => d["SetPosition"]).Returns((Action<Vector>)(_ => { }));
 
-            iocMock
-                .Setup(i => i.Resolve("Adapters.IMovingObject", It.IsAny<object>()))
-                .Returns(adapter);
+            ioc.Register("Adapters.IMovingObject", (Func<object, IDictionary<string, object>>)(obj => adapterMock.Object));
 
-            var command = new RegisterIoCDependencyMoveCommand(iocMock.Object);
+            var command = new RegisterIoCDependencyMoveCommand(ioc);
 
             command.Execute();
 
-            iocMock.Verify(i => i.Register(
-                "Commands.Move",
-                It.IsAny<Func<object, ICommand>>()
-            ), Times.Once);
+            var factory = ioc.Resolve<Func<object, ICommand>>("Commands.Move");
+            Assert.NotNull(factory);
 
-            Func<object, ICommand>? registeredFactory = null;
-            
-            iocMock.Verify(i => i.Register(
-                "Commands.Move", 
-                It.Is<Func<object, ICommand>>(f => { registeredFactory = f; return true; })
-            ), Times.Once);
+            var gameObject = new object();
+            var result = factory(gameObject);
+            Assert.IsType<MoveCommand>(result);
 
-            if (registeredFactory is not null)
-            {
-                var gameObject = new object();
-                var result = registeredFactory(gameObject);
-                
-                Assert.IsType<MoveCommand>(result);
-                
-                iocMock.Verify(i => i.Resolve("Adapters.IMovingObject", gameObject), Times.Once);
-            }
+            adapterMock.Verify(a => a["Position"], Times.Once);
+            adapterMock.Verify(a => a["Velocity"], Times.Once);
+            adapterMock.Verify(a => a["SetPosition"], Times.Once);
         }
     }
 }
