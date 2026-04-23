@@ -18,14 +18,15 @@ namespace OoaipSpaceServer2026.Infrastructure
         {
             if (!_services.TryGetValue(key, out var service))
                 throw new InvalidOperationException($"Dependency '{key}' is not registered.");
-            return (T)service;
+            return (T)service;  
         }
 
         public object Resolve(string key, object arg)
         {
             if (!_services.TryGetValue(key, out var service))
                 throw new InvalidOperationException($"Dependency '{key}' is not registered.");
-            return service.DynamicInvoke(arg);
+            return service.DynamicInvoke(arg) 
+                ?? throw new InvalidOperationException($"Dependency '{key}' returned null.");
         }
     }
 }

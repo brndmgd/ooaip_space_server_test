@@ -4,6 +4,7 @@ using Xunit;
 using Moq;
 using OoaipSpaceServer2026.Commands;
 using OoaipSpaceServer2026.Infrastructure;
+using OoaipSpaceServer2026.Interfaces;
 using OoaipSpaceServer2026.Models;
 
 namespace Tests
