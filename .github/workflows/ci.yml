@@ -2,11 +2,10 @@ name: AppServer CI
 
 on:
   pull_request:
-    branches: ["master"]
 
 env:
   DIR: ./
-  DOTNET_VERSION: '7.0.x'
+  DOTNET_VERSION: '9.0.x'
 
 jobs:
   test-and-coverage:
@@ -32,7 +31,7 @@ jobs:
             ${{ runner.os }}-nuget-
       
       - name: Style
-        run: dotnet format --verify-no-changes
+        run: dotnet format --verify-no-changes ooaip_space_server2026.slnx
 
       - name: Restore dependencies
         working-directory: ${{ env.DIR }}
@@ -44,7 +43,6 @@ jobs:
 
       - name: Test with coverage
         working-directory: ${{ env.DIR }}
-        continue-on-error: true
         run: |
           mkdir -p coverage
           dotnet test --configuration Debug \
@@ -52,7 +50,7 @@ jobs:
             /p:CollectCoverage=true \
             /p:CoverletOutputFormat=opencover \
             /p:CoverletOutput=coverage/coverage.opencover.xml \
-            --logger "trx;LogFileName=test-results.trx" || echo "No tests found, skipping coverage"
+            --logger "trx;LogFileName=test-results.trx"
 
       - name: Upload coverage to Codecov
         if: hashFiles('coverage/coverage.opencover.xml') != ''
