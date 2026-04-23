@@ -63,7 +63,6 @@ jobs:
           name: codecov-umbrella
           fail_ci_if_error: false
           verbose: true
-          comment: true
 
       - name: Create coverage badge
         if: github.event.pull_request.head.repo.full_name == github.repository
@@ -81,3 +80,4 @@ jobs:
         run: |
           echo "### Code Coverage Report" >> $GITHUB_STEP_SUMMARY
           echo "Coverage: ${{ steps.create_coverage_badge.outputs.percentage }}%" >> $GITHUB_STEP_SUMMARY
+        
