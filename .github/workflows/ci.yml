@@ -61,10 +61,6 @@ jobs:
           fail_ci_if_error: false
           verbose: true
           comment: true
-          comment_config:
-            require_changes: true
-            require_base: true
-            require_head: true
 
       - name: Create coverage badge
         if: github.event.pull_request.head.repo.full_name == github.repository
