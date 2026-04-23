@@ -39,7 +39,7 @@ jobs:
         working-directory: ${{ env.DIR }}
         run: dotnet build --configuration Debug --no-restore /p:ContinuousIntegrationBuild=true
 
-            - name: Test with coverage
+      - name: Test with coverage
         working-directory: ${{ env.DIR }}
         continue-on-error: true
         run: |
