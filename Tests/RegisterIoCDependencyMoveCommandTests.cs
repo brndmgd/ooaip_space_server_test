@@ -4,7 +4,6 @@ using Xunit;
 using Moq;
 using OoaipSpaceServer2026.Commands;
 using OoaipSpaceServer2026.Infrastructure;
-using OoaipSpaceServer2026.Interfaces;
 using OoaipSpaceServer2026.Models;
 
 namespace Tests
@@ -14,20 +13,18 @@ namespace Tests
         [Fact]
         public void Execute_RegistersMoveCommandFactory_DependencyCanBeResolved()
         {
-            var ioc = new IocService();
-            
             var adapterMock = new Mock<IDictionary<string, object>>();
             adapterMock.Setup(d => d["Position"]).Returns((Func<Vector>)(() => new Vector(10, 20)));
             adapterMock.Setup(d => d["Velocity"]).Returns((Func<Vector>)(() => new Vector(1, 2)));
             adapterMock.Setup(d => d["SetPosition"]).Returns((Action<Vector>)(_ => { }));
 
-            ioc.Register("Adapters.IMovingObject", (Func<object, IDictionary<string, object>>)(obj => adapterMock.Object));
+            Ioc.Register("Adapters.IMovingObject", (Func<object, IDictionary<string, object>>)(obj => adapterMock.Object));
 
-            var command = new RegisterIoCDependencyMoveCommand(ioc);
+            var command = new RegisterIoCDependencyMoveCommand();
 
             command.Execute();
 
-            var factory = ioc.Resolve<Func<object, ICommand>>("Commands.Move");
+            var factory = Ioc.Resolve<Func<object, ICommand>>("Commands.Move");
             Assert.NotNull(factory);
 
             var gameObject = new object();
