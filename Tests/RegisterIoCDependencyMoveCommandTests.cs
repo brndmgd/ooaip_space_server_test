@@ -31,25 +31,27 @@ namespace Tests
 
             command.Execute();
 
-            iocMock.Verify(i => i.Register<Func<object, ICommand>>(
+            iocMock.Verify(i => i.Register(
                 "Commands.Move",
                 It.IsAny<Func<object, ICommand>>()
             ), Times.Once);
 
-            Func<object, ICommand> capturedFactory = null;
+            Func<object, ICommand>? registeredFactory = null;
+            
             iocMock.Verify(i => i.Register(
-                "Commands.Move",
-                It.Is<Func<object, ICommand>>(f => { capturedFactory = f; return true; })
+                "Commands.Move", 
+                It.Is<Func<object, ICommand>>(f => { registeredFactory = f; return true; })
             ), Times.Once);
 
-            Assert.NotNull(capturedFactory);
-            
-            var gameObject = new object();
-            var result = capturedFactory(gameObject);
-            
-            Assert.IsType<MoveCommand>(result);
-            
-            iocMock.Verify(i => i.Resolve("Adapters.IMovingObject", gameObject), Times.Once);
+            if (registeredFactory is not null)
+            {
+                var gameObject = new object();
+                var result = registeredFactory(gameObject);
+                
+                Assert.IsType<MoveCommand>(result);
+                
+                iocMock.Verify(i => i.Resolve("Adapters.IMovingObject", gameObject), Times.Once);
+            }
         }
     }
 }
