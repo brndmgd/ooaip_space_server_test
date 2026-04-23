@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace OoaipSpaceServer2026.Models
 {
@@ -43,9 +42,9 @@ namespace OoaipSpaceServer2026.Models
             return left.Add(right);
         }
 
-        public override bool Equals(object obj) => Equals(obj as Vector);
+        public override bool Equals(object? obj) => Equals(obj as Vector);
 
-        public bool Equals(Vector other)
+        public bool Equals(Vector? other)
         {
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
