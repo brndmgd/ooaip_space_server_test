@@ -42,12 +42,13 @@ jobs:
       - name: Test with coverage
         working-directory: ${{ env.DIR }}
         run: |
+          mkdir -p coverage
+          
           dotnet test --configuration Debug \
             --no-build \
-            --collect:"XPlat Code Coverage" \
-            --results-directory ./coverage \
+            /p:CollectCoverage=true \
             /p:CoverletOutputFormat=opencover \
-            /p:CoverletOutput=./coverage/coverage.opencover.xml \
+            /p:CoverletOutput=coverage/coverage.opencover.xml \
             --logger "trx;LogFileName=test-results.trx"
 
       - name: Upload coverage to Codecov
