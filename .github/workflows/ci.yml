@@ -2,11 +2,10 @@ name: AppServer CI
 
 on:
   pull_request:
-    branches: ["master"]
 
 env:
   DIR: ./
-  DOTNET_VERSION: '7.0.x'
+  DOTNET_VERSION: '9.0.x'
 
 jobs:
   test-and-coverage:
@@ -30,6 +29,9 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
+      
+      - name: Style
+        run: dotnet format --verify-no-changes ooaip_space_server2026.slnx
 
       - name: Restore dependencies
         working-directory: ${{ env.DIR }}
@@ -42,43 +44,41 @@ jobs:
       - name: Test with coverage
         working-directory: ${{ env.DIR }}
         run: |
+          mkdir -p coverage
           dotnet test --configuration Debug \
             --no-build \
-            --collect:"XPlat Code Coverage" \
-            --results-directory ./coverage \
+            /p:CollectCoverage=true \
             /p:CoverletOutputFormat=opencover \
-            /p:MergeWith=../coverage/coverage.json \
-            /p:CoverletOutput=./coverage/coverage.opencover.xml \
+            /p:CoverletOutput=coverage/coverage.opencover.xml \
             --logger "trx;LogFileName=test-results.trx"
 
-      - name: Upload coverage to Codecov + PR comment
+      - name: Upload coverage to Codecov
+        if: hashFiles('coverage/coverage.opencover.xml') != ''
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ${{ env.DIR }}/coverage/coverage.opencover.xml
+          files: coverage/coverage.opencover.xml
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
           verbose: true
-          comment: true
-          comment_config:
-            require_changes: true
-            require_base: true
-            require_head: true
 
       - name: Create coverage badge
-        if: github.event.pull_request.head.repo.full_name == github.repository
+        if: github.event.pull_request.head.repo.full_name == github.repository && hashFiles('coverage/coverage.opencover.xml') != ''
+        continue-on-error: true
         uses: simon-k/dotnet-code-coverage-badge@v1.0.0
         id: create_coverage_badge
         with:
           label: Code Coverage
           color: brightgreen
-          path: ${{ env.DIR }}/coverage/coverage.opencover.xml
+          path: coverage/coverage.opencover.xml
           gist-filename: code-coverage-${{ github.event.pull_request.number }}.json
           gist-id: ${{ secrets.COVERAGE_GIST_ID }}
           gist-auth-token: ${{ secrets.GIST_SECRET }}
 
       - name: Print coverage summary
+        if: hashFiles('coverage/coverage.opencover.xml') != ''
         run: |
           echo "### Code Coverage Report" >> $GITHUB_STEP_SUMMARY
           echo "Coverage: ${{ steps.create_coverage_badge.outputs.percentage }}%" >> $GITHUB_STEP_SUMMARY
+        

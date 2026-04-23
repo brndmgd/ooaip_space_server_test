@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ooaip_space_server2026.csproj" />
+  <Project Path="Tests/Tests.csproj" />
+</Solution>
